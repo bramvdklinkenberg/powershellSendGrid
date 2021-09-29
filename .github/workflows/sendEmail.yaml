@@ -1,0 +1,28 @@
+name: "Send e-mail via Powershell and SendGrid"
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 12 30 * *'
+
+jobs:
+  install_ps_sendgrid_module:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install PSSendGrid Module
+        shell: pwsh
+        run: |
+          Install-Module -Name PSSendGrid -Scope CurrentUser -Force;
+          Import-Module -Name PSSendGrid
+      - name: Send Test Email
+        shell: pwsh
+        run: Send-PSSendGridMail `
+                -ToAddress ${{ secrets.TO_EMAILADDRESS }} `
+                -ToName 'Bram'
+                -FromAddress ${{ secrets.FROM_EMAILADDRESS }} `
+                -FromName 'Bram' `
+                -Subject 'Test' `
+                -Body 'This is a test'
+                -Token ${{ secrets.SENDGRID_TOKEN }}
